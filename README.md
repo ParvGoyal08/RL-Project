@@ -16,6 +16,7 @@
   * [Loading a Stored Model](#loading-a-stored-model)
   * [Optional Configuration](#optional-configuration)
   * [Utilities](#utilities)
+  * [Hierarchical Navigation](#hierarchical-navigation)
 * [Physical Robot](#physical-robot)
 * [Troubleshooting](#troubleshooting)
 
@@ -457,6 +458,56 @@ The script will loop through all of your models and select the models to keep li
 
 To enable a complete visualization of the neural network neuron activity and biases simply set `ENABLE_VISUAL` to `True` in `settings.py`. This requires the python3 packages `pyqtgraph` and `PyQt5` to be installed.
 The visual should mainly be used during evaluation as it can slow down training significantly.
+
+## **Hierarchical Navigation**
+
+In addition to the standard DRL agents (DQN, DDPG, TD3), this repository includes a hierarchical navigation system that combines a high-level Subgoal Agent (SA) with a low-level Motion Agent (MA).
+
+### Training Hierarchical Models
+
+To train hierarchical navigation models, use the provided training script:
+
+```bash
+./run_hierarchical.sh train-full
+```
+
+This runs a two-stage training process:
+1. **Stage 1**: Pre-train the Motion Agent (MA) until convergence
+2. **Stage 2**: Train the Subgoal Agent (SA) with the frozen MA
+
+See `run_hierarchical.sh` for more training options.
+
+### Testing Hierarchical Models
+
+To test trained hierarchical models in Gazebo simulation, you need three terminals:
+
+**Terminal 1: Launch Gazebo**
+```bash
+ros2 launch turtlebot3_gazebo turtlebot3_drl_stage4.launch.py
+```
+
+**Terminal 2: Launch Goal Spawner**
+```bash
+ros2 run turtlebot3_drl gazebo_goals
+```
+
+**Terminal 3: Run Hierarchical Test Agent**
+```bash
+ros2 run turtlebot3_drl test_hierarchical_agent \
+    models/hierarchical/ma_converged.pth \
+    models/hierarchical/sa_best.pth \
+    10
+```
+
+Or use the convenience script:
+```bash
+./test_hierarchical.sh models/ma.pth models/sa.pth 10 4
+```
+
+The hierarchical testing environment provides the same Gazebo simulation interface as other agents, making it easy to compare performance across different approaches.
+
+For detailed documentation on hierarchical testing, see [docs/HIERARCHICAL_TESTING.md](docs/HIERARCHICAL_TESTING.md).
+
 ## Command Specification
 
 **train_agent:**
