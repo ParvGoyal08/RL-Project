@@ -256,9 +256,12 @@ class HierarchicalTester(Node):
         
         # Collision (check minimum LiDAR reading)
         if self.lidar_scan is not None:
-            min_dist = np.min(self.lidar_scan)
-            if min_dist < self.config.COLLISION_DISTANCE:
-                return True, 'collision'
+            # Filter out invalid readings (inf, nan) before checking collision
+            valid_readings = self.lidar_scan[np.isfinite(self.lidar_scan)]
+            if len(valid_readings) > 0:
+                min_dist = np.min(valid_readings)
+                if min_dist < self.config.COLLISION_DISTANCE:
+                    return True, 'collision'
         
         # Timeout
         if self.total_step_count >= self.config.EPISODE_TIMEOUT:
@@ -278,7 +281,9 @@ class HierarchicalTester(Node):
         waypoints = self.waypoint_manager.get_waypoints_robot_frame(
             self.robot_x, self.robot_y, self.robot_theta
         )
-        waypoints_flat = waypoints.flatten() if waypoints is not None else np.zeros(10)
+        # Waypoint array size is 2 * NUM_WAYPOINTS (x, y pairs)
+        expected_size = 2 * self.config.NUM_WAYPOINTS
+        waypoints_flat = waypoints.flatten() if waypoints is not None else np.zeros(expected_size)
         
         return {
             'lidar': lidar,
@@ -291,7 +296,13 @@ class HierarchicalTester(Node):
             return np.zeros(5, dtype=np.float32)
         
         px, py = self.current_subgoal
-        theta_diff = math.atan2(py, px)
+        
+        # Handle zero-distance subgoal case
+        dist = math.sqrt(px**2 + py**2)
+        if dist < 1e-6:
+            theta_diff = 0.0
+        else:
+            theta_diff = math.atan2(py, px)
         
         # Normalize to [-pi, pi]
         while theta_diff > math.pi:
@@ -414,7 +425,8 @@ class HierarchicalTester(Node):
                 self.total_step_count += 1
                 self.ma_step_count += 1
                 
-                rclpy.spin_once(self, timeout_sec=0.01)
+                # Process callbacks to update sensor data
+                rclpy.spin_once(self, timeout_sec=0.001)
                 
                 done, termination_reason = self.check_termination()
                 if done:
