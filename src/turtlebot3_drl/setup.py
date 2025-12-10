@@ -19,6 +19,7 @@ setup(
         ('share/' + package_name + '/launch', glob.glob(os.path.join('launch', 'turtlebot3_drl_stage4.launch.py'))),
         ('share/' + package_name + '/launch', glob.glob(os.path.join('launch', 'turtlebot3_drl_stage5.launch.py'))),
         ('share/' + package_name + '/launch', glob.glob(os.path.join('launch', 'turtlebot3_drl_stage6.launch.py'))),
+        ('share/' + package_name + '/launch', glob.glob(os.path.join('launch', 'test_hierarchical.launch.py'))),
     ],
     install_requires=['setuptools', 'launch'],
     zip_safe=True,
@@ -49,8 +50,9 @@ setup(
             'remote_train_agent = turtlebot3_drl.drl_agent.drl_agent_remote:main_train',
             'remote_test_agent = turtlebot3_drl.drl_agent.drl_agent_remote:main_test',
             'remote_real_agent = turtlebot3_drl.drl_agent.drl_agent_remote:main_real',
-            # Hierarchical navigation training
+            # Hierarchical navigation training and testing
             'hierarchical_train = turtlebot3_drl.hierarchical.training.hierarchical_trainer:main',
+            'test_hierarchical_agent = turtlebot3_drl.hierarchical.testing.hierarchical_tester:main',
         ],
     },
 )
