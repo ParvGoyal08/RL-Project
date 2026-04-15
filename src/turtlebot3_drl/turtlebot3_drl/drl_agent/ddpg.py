@@ -14,7 +14,7 @@ from .off_policy_agent import OffPolicyAgent, Network
 
 LINEAR = 0
 ANGULAR = 1
-
+# this is RL project
 # Reference for network structure: https://arxiv.org/pdf/2102.10711.pdf
 # https://github.com/hanlinniu/turtlebot3_ddpg_collision_avoidance/blob/main/turtlebot_ddpg/scripts/original_ddpg/ddpg_network_turtlebot3_original_ddpg.py
 
